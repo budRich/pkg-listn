@@ -83,24 +83,24 @@ main() {
 
 update_cache_file() {
 
-  file_is_not_empty "$file_install" \
-    && cat "$file_install" > "$file_check"
-
-  file_is_not_empty "$file_remove" \
-    && cat "$file_remove" >> "$file_check"
-
-  file_is_not_empty "$file_check" && {
+  file_is_not_empty "$file_install" && {
     while read -rs line ; do
-      #TODO: can all pkgs be tested with one pacman cmd???
       pacman -Qqs "^${line}\$" >/dev/null || echo "$line" >> "$file_list_remove"
-    done < "$file_check"
+    done < "$file_install"
   }
+
+  file_is_not_empty "$file_remove" && {
+    while read -rs line ; do
+      pacman -Qqs "^${line}\$" >/dev/null && echo "$line" >> "$file_tmp"
+    done < "$file_remove"
+  }
+
 
   if file_is_not_empty "$file_list_remove" ; then
     comm -23 "$file_tmp" "$file_list_remove"
   else
     cat "$file_tmp"
-  fi > "$file_cache"
+  fi | sort -u > "$file_cache"
 }
 
 print_uninstalled() {
