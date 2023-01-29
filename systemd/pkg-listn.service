@@ -1,0 +1,7 @@
+[Unit]
+Description=install or remove packages interactively
+
+[Service]
+Type=oneshot
+ExecStart=notify-send "package list updated"
+ExecStart=pkg-listn

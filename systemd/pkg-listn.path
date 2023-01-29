@@ -1,0 +1,6 @@
+[Unit]
+Description=watch ~/.config/pkg-listn/packages
+PartOf=graphical-session.target
+
+[Path]
+PathModified=%h/.config/pkg-listn/packages
