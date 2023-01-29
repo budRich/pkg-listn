@@ -44,7 +44,7 @@ file_msg="$dir_tmp/msg"                 # content of this file will be echoed in
   cp -r "$dir_data"/* "$dir_config"
 }
 
-# trap 'rm -rf "$dir_tmp"/*' EXIT INT HUP
+trap 'rm -rf "$dir_tmp"/*' EXIT INT HUP
 
 main() {
 
