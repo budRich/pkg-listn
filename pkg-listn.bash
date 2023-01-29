@@ -4,12 +4,13 @@ _name=pkg-listn
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
 : "${XDG_CONFIG_HOME:=$HOME/.config}"
 
-_script_dir=$(dirname "$(realpath "$0")")
+dir_script=$(dirname "$(realpath "$0")")
 dir_tmp="/tmp/$_name"
 dir_cache="$XDG_CACHE_HOME/$_name"
+dir_config="$XDG_CONFIG_HOME/$_name"
 
-file_home="$_script_dir/arch-pkg" # config file
-file_cache="$dir_cache/arch-pkg"  # sorted cache file
+file_packages="$dir_config/packages"    # config file
+file_cache="$dir_cache/packages-cache"  # sorted cache file
 
 # temporary helper files
 # dir_tmp is removed when script terminates
@@ -29,6 +30,20 @@ file_msg="$dir_tmp/msg"                 # content of this file will be echoed in
   exit 1
 }
 
+# in makefile m4 will expand DATA_DIR
+# before installation
+[[ -d DATA_DIR ]] \
+  && dir_data='DATA_DIR' \
+  || dir_data="$dir_script/conf"
+
+[[ -d $dir_config ]] || {
+  [[ -d $dir_data ]] \
+    || { echo datadir not found ; exit 1 ;}
+
+  mkdir -p "$dir_config"
+  cp -r "$dir_data"/* "$dir_config"
+}
+
 # trap 'rm -rf "$dir_tmp"/*' EXIT INT HUP
 
 main() {
@@ -42,7 +57,7 @@ main() {
   while read -rs line ; do
     [[ ! $line || $line =~ ^\s*# ]] && continue
     pkgs+=(${line})
-  done < "$file_home" 
+  done < "$file_packages" 
 
   printf '%s\n' "${pkgs[@]}" | sort -u > "$file_tmp"
 

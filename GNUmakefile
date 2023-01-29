@@ -7,7 +7,7 @@ install:
 	install -Dm755 pkg-listn.bash $(DESTDIR)$(PREFIX)/bin/$(NAME)
 
 install-dev:
-	ln -fs pkg-listn.bash $(DESTDIR)$(PREFIX)/bin/$(NAME)
+	ln -fs $(realpath pkg-listn.bash) $(DESTDIR)$(PREFIX)/bin/$(NAME)
 
 uninstall-dev: uninstall
 
