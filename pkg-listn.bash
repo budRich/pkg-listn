@@ -2,37 +2,38 @@
 
 _name=pkg-listn
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
+: "${XDG_CONFIG_HOME:=$HOME/.config}"
 
 _script_dir=$(dirname "$(realpath "$0")")
-tmp_dir="/tmp/$_name"
-cache_dir="$XDG_CACHE_HOME/$_name"
+dir_tmp="/tmp/$_name"
+dir_cache="$XDG_CACHE_HOME/$_name"
 
 file_home="$_script_dir/arch-pkg" # config file
-file_cache="$cache_dir/arch-pkg"  # sorted cache file
+file_cache="$dir_cache/arch-pkg"  # sorted cache file
 
 # temporary helper files
-# tmp_dir is removed when script terminates
-file_lock="$tmp_dir/lock"               # lock file is destroyed from terminal
-file_tmp="$tmp_dir/tmp"                 # sorted copy of config
-file_remove="$tmp_dir/remove"           # list of pkgs in cache, not in config (remove)
-file_install="$tmp_dir/install"         # list of pkgs in config, not in cache (install)
-file_aur="$tmp_dir/aur"                 # install filtered with only AUR packages
-file_official="$tmp_dir/official"       # install filtered with only official packages
-file_list_remove="$tmp_dir/list_remove" # succesfully removed, and/or failed installed packages
-file_commands="$tmp_dir/commands"       # commands executed in the terminal
-file_check="$tmp_dir/check"             # file install+removed concatenated
-file_msg="$tmp_dir/msg"                 # content of this file will be echoed in created terminal
+# dir_tmp is removed when script terminates
+file_lock="$dir_tmp/lock"               # lock file is destroyed from terminal
+file_tmp="$dir_tmp/tmp"                 # sorted copy of config
+file_remove="$dir_tmp/remove"           # list of pkgs in cache, not in config (remove)
+file_install="$dir_tmp/install"         # list of pkgs in config, not in cache (install)
+file_aur="$dir_tmp/aur"                 # install filtered with only AUR packages
+file_official="$dir_tmp/official"       # install filtered with only official packages
+file_list_remove="$dir_tmp/list_remove" # succesfully removed, and/or failed installed packages
+file_commands="$dir_tmp/commands"       # commands executed in the terminal
+file_check="$dir_tmp/check"             # file install+removed concatenated
+file_msg="$dir_tmp/msg"                 # content of this file will be echoed in created terminal
 
 [[ -f $file_lock ]] && {
   echo "[ERROR] pkg-parsing in progress, lockfile exists"
   exit 1
 }
 
-# trap 'rm -rf "$tmp_dir"/*' EXIT INT HUP
+# trap 'rm -rf "$dir_tmp"/*' EXIT INT HUP
 
 main() {
 
-  mkdir -p "$tmp_dir" "$cache_dir"
+  mkdir -p "$dir_tmp" "$dir_cache"
   touch "$file_lock"
   touch "$file_cache"
 
