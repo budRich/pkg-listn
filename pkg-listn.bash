@@ -1,147 +1,130 @@
 #!/bin/bash
 
-_name=pkg-listn
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
 : "${XDG_CONFIG_HOME:=$HOME/.config}"
 
+_name=pkg-listn
+
 dir_script=$(dirname "$(realpath "$0")")
-dir_tmp="/tmp/$_name"
 dir_cache="$XDG_CACHE_HOME/$_name"
 dir_config="$XDG_CONFIG_HOME/$_name"
+dir_tmp="/tmp/$_name"
 
-file_packages="$dir_config/packages"    # config file
+file_packages="$dir_config/packages"    # user defined pkg list
+file_settings="$dir_config/settings"    # config file
+file_sorted="$dir_tmp/sorted"           # sorted copy of pkg list
 file_cache="$dir_cache/packages-cache"  # sorted cache file
+file_lock="$dir_tmp/lock"
 
-# temporary helper files
-# dir_tmp is removed when script terminates
-file_lock="$dir_tmp/lock"               # lock file is destroyed from terminal
-file_tmp="$dir_tmp/tmp"                 # sorted copy of config
-file_remove="$dir_tmp/remove"           # list of pkgs in cache, not in config (remove)
-file_install="$dir_tmp/install"         # list of pkgs in config, not in cache (install)
-file_aur="$dir_tmp/aur"                 # install filtered with only AUR packages
-file_official="$dir_tmp/official"       # install filtered with only official packages
-file_list_remove="$dir_tmp/list_remove" # succesfully removed, and/or failed installed packages
-file_commands="$dir_tmp/commands"       # commands executed in the terminal
-file_check="$dir_tmp/check"             # file install+removed concatenated
-file_msg="$dir_tmp/msg"                 # content of this file will be echoed in created terminal
+set -E
+trap '(($? == 98)) && exit 98' ERR
 
-[[ -f $file_lock ]] && {
-  echo "[ERROR] pkg-parsing in progress, lockfile exists"
-  exit 1
-}
+ERX() { >&2 echo  "[ERROR] $*" ; exit 98 ;}
+ERR() { >&2 echo  "[WARNING] $*"  ;}
+ERM() { >&2 echo  "$*"  ;}
 
-# in makefile m4 will expand DATA_DIR
-# before installation
+[[ -f $file_lock ]] \
+  && ERX "pkg-parsing in progress, lockfile exists"
+
+trap 'rm -rf "$dir_tmp"/*' EXIT INT HUP
+mkdir -p "$dir_tmp" "$dir_cache"
+touch "$file_lock" "$file_cache"
+
+### parse(or create) config 
+# DATA_DIR is replaced during installation
+# defaults to /usr/share/pkg-listn/
 [[ -d DATA_DIR ]] \
   && dir_data='DATA_DIR' \
   || dir_data="$dir_script/conf"
 
 [[ -d $dir_config ]] || {
-  [[ -d $dir_data ]] \
-    || { echo datadir not found ; exit 1 ;}
-
+  [[ -d $dir_data ]] || ERX "datadir not found"
   mkdir -p "$dir_config"
   cp -r "$dir_data"/* "$dir_config"
 }
 
-trap 'rm -rf "$dir_tmp"/*' EXIT INT HUP
-
-main() {
-
-  mkdir -p "$dir_tmp" "$dir_cache"
-  touch "$file_lock"
-  touch "$file_cache"
-
-  rm -f "$file_commands"
-
+[[ -f "$file_settings" ]] && {
+  re='^(\s*[^#][^=[:space:]]+)\s*=\s*(.+)$'
   while read -rs line ; do
-    [[ ! $line || $line =~ ^\s*# ]] && continue
-    pkgs+=(${line})
-  done < "$file_packages" 
-
-  printf '%s\n' "${pkgs[@]}" | sort -u > "$file_tmp"
-
-  entries_unique_to_config | print_uninstalled > "$file_install"
-
-  file_is_not_empty "$file_cache" \
-    && entries_unique_to_cache | sed -r 's/^\s*//g' > "$file_remove"
-
-  file_is_not_empty "$file_install" && {
-    filter_official | sed -r 's/^\s*//g' > "$file_official"
-    filter_aur      | sed -r 's/^\s*//g' > "$file_aur"
-
-    file_is_not_empty "$file_official" && {
-      echo "sudo pacman --needed -S - < '$file_official'"
-    } >> "$file_commands"
-
-    file_is_not_empty "$file_aur" && {
-      echo "yay --needed -S - < '$file_aur'"
-    } >> "$file_commands"
-  }
-
-  file_is_not_empty "$file_remove" && {
-    echo "sudo pacman -Rsu - < '$file_remove'"
-  } >> "$file_commands"
-
-  [[ -f "$file_commands" ]] && {
-    [[ -f $file_msg ]] \
-      && echo "cat '$file_msg' \; '${cmd[@]}'" >> "$file_commands"
-    chmod +x "$file_commands"
-    cat "$file_commands"
-    cid=$(i3term --no-exec --verbose -- bash "$file_commands")
-
-    while i3get -n "$cid" >/dev/null; do sleep 2 ; done
-
-  }
-
-  update_cache_file
+    [[ $line =~ $re ]] || continue
+    key="${BASH_REMATCH[1]}" val="${BASH_REMATCH[2]}"
+    case "$key" in
+      pacman_install ) cmd_pacman_install=$val ;;
+      pacman_remove  ) cmd_pacman_remove=$val  ;;
+      aur_install    ) cmd_aur_install=$val    ;;
+      aur_list       ) cmd_aur_list=$val       ;;
+      i3term_options ) i3term_options=$val     ;;
+    esac
+  done < "$file_settings"
+  unset -v key val re line
 }
 
-update_cache_file() {
+: "${cmd_pacman_install:="sudo pacman -S"}"
+: "${cmd_pacman_remove:="sudo pacman -Rsu"}"
+: "${cmd_aur_install:="yay -S"}"
+: "${cmd_aur_list:="yay --aur -Slq"}"
+: "${i3term_options:="--instance pkg-listn --verbose"}"
 
-  file_is_not_empty "$file_install" && {
-    while read -rs line ; do
-      pacman -Qqs "^${line}\$" >/dev/null || echo "$line" >> "$file_list_remove"
-    done < "$file_install"
-  }
+IFS=" " read -r -a _cmd_aur_list   <<< "$cmd_aur_list"
+IFS=" " read -r -a _i3term_options <<< "$i3term_options"
 
-  file_is_not_empty "$file_remove" && {
-    while read -rs line ; do
-      pacman -Qqs "^${line}\$" >/dev/null && echo "$line" >> "$file_tmp"
-    done < "$file_remove"
-  }
+### parse pkg list
+while read -rs line ; do
+  [[ ! $line || $line =~ ^\s*# ]] && continue
+  echo "$line"
+done < "$file_packages" \
+  | sed -r 's/\s+/\n/g' | sort -u > "$file_sorted"
 
+### compare lists
+comm -13 "$file_cache" "$file_sorted" \
+   | comm -23 - <(pacman -Qq | sort)   > "$dir_tmp"/install
+comm -23 "$file_cache" "$file_sorted"  > "$dir_tmp"/remove
 
-  if file_is_not_empty "$file_list_remove" ; then
-    comm -23 "$file_tmp" "$file_list_remove"
-  else
-    cat "$file_tmp"
-  fi | sort -u > "$file_cache"
+[[ -s "$dir_tmp"/install ]]  \
+  && comm -12 "$dir_tmp"/install <(pacman -Slq | sort) \
+   | tee "$dir_tmp"/official \
+   | comm -13 - "$dir_tmp"/install > "$dir_tmp"/foreign
+
+[[ -s "$dir_tmp"/foreign ]] \
+  && comm -12 "$dir_tmp"/foreign <("${_cmd_aur_list[@]}" | sort) \
+   | tee "$dir_tmp"/aur     \
+   | comm -13 - "$dir_tmp"/foreign > "$dir_tmp"/notavailable
+
+### set actions
+for action in notavailable remove official aur ; do
+  [[ -s "$dir_tmp/$action" ]] || continue
+  mapfile -t line_of_pkgs < "$dir_tmp/$action"
+  case "$action" in
+    
+    remove   ) commands+=("$cmd_pacman_remove ${line_of_pkgs[*]}") ;;
+    official ) commands+=("$cmd_pacman_install ${line_of_pkgs[*]}") ;;
+    aur      ) commands+=("$cmd_aur_install ${line_of_pkgs[*]}") ;;
+    
+    notavailable ) printf '%s\n' \
+      "[WARNING]: The following packages was not found in any repositories:" \
+      "  ${line_of_pkgs[*]}" "" >> "$dir_tmp/msg"
+    ;;
+  esac
+done
+
+### launch commands
+[[ ${commands[*]} ]] && {
+  echo "sleep .4" >> "$dir_tmp/cmd"
+  echo "cat '$dir_tmp/msg'" >> "$dir_tmp/cmd"
+  echo "The commands below will be executed:" >> "$dir_tmp/msg"
+  for command in "${commands[@]}"; do
+    echo "  $command" >> "$dir_tmp/msg"
+    echo "$command"   >> "$dir_tmp/cmd"
+  done
+  echo >> "$dir_tmp/msg"
+
+  chmod +x "$dir_tmp/cmd"
+  cid=$(i3term "${_i3term_options[@]}" -- "$dir_tmp/cmd")
+  while i3get -n "$cid" >/dev/null; do sleep 2 ; done
 }
 
-print_uninstalled() {
-  comm -13 <(pacman -Qq | sort) -
-}
-
-entries_unique_to_cache() {
-  comm -23 "$file_cache" "$file_tmp"
-}
-
-entries_unique_to_config() {
-  comm -13 "$file_cache" "$file_tmp"
-}
-
-filter_official() {
-  comm  -12 <(pacman -Slq | sort) "$file_install"
-}
-
-filter_aur() {
-  comm -3 "$file_official" "$file_install"
-}
-
-file_is_not_empty() {
-  local file=$1
-  [[ -f $file ]] && grep -q '[^[:space:]]' "$file"
-}
-
-main "$@"
+### update cache
+{
+  cat "$dir_tmp/sorted"
+  [[ -s "$dir_tmp/remove" ]] && cat "$dir_tmp/remove"
+} | sort -u | comm -12 - <(pacman -Qq | sort) > "$file_cache"
