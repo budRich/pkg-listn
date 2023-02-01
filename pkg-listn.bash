@@ -1,9 +1,12 @@
 #!/bin/bash
 
+_name=pkg-listn
+
+printf -v _about '%s - version %s\nupdated by budRich %s' \
+  "$_name" "0.0.1" "23/2/2"
+
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
 : "${XDG_CONFIG_HOME:=$HOME/.config}"
-
-_name=pkg-listn
 
 dir_script=$(dirname "$(realpath "$0")")
 dir_cache="$XDG_CACHE_HOME/$_name"
@@ -22,6 +25,8 @@ trap '(($? == 98)) && exit 98' ERR
 ERX() { >&2 echo  "[ERROR] $*" ; exit 98 ;}
 ERR() { >&2 echo  "[WARNING] $*"  ;}
 ERM() { >&2 echo  "$*"  ;}
+
+[[ $* =~ -v(\s|$) ]] && ERM "$_about" && exit
 
 [[ -f $file_lock ]] \
   && ERX "pkg-parsing in progress, lockfile exists"
