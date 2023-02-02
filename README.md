@@ -69,8 +69,21 @@ package (simply by removing it from **package file**).
 
 ## how
 
-```
-sudo make install
+As mentioned [i3term] needs to be installed, but
+it is trivial to modify the script to work with
+any terminal emulator. Beside that the only
+runtime dependencies are:  
+  - GNU sed
+  - GNU make
+  - GNU bash
+  - pacman
+  - an AUR helper (optional)
+
+When you have that run:  
+
+ ```
+ # make install
+ $ pkg-listn -v
 ```
 
 [NixOS]: https://nixos.org/
