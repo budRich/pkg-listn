@@ -31,13 +31,13 @@ ERM() { >&2 echo  "$*"  ;}
 [[ -f $file_lock ]] \
   && ERX "pkg-parsing in progress, lockfile exists"
 
-trap 'rm -rf "$dir_tmp"/*' EXIT INT HUP
+trap 'rm "$dir_tmp"/*' EXIT INT HUP
 mkdir -p "$dir_tmp" "$dir_cache"
 touch "$file_lock" "$file_cache"
 
-### parse(or create) config 
+### parse config 
 # DATA_DIR is replaced during installation
-# defaults to /usr/share/pkg-listn/
+# defaults to: /usr/share/pkg-listn
 [[ -d DATA_DIR ]] \
   && dir_data='DATA_DIR' \
   || dir_data="$dir_script/conf"
@@ -49,7 +49,7 @@ touch "$file_lock" "$file_cache"
 }
 
 [[ -f "$file_settings" ]] && {
-  re='^(\s*[^#][^=[:space:]]+)\s*=\s*(.+)$'
+  re='^\s*([^#][^=[:space:]]+)\s*=\s*(.+)$'
   while read -rs line ; do
     [[ $line =~ $re ]] || continue
     key="${BASH_REMATCH[1]}" val="${BASH_REMATCH[2]}"
@@ -65,10 +65,10 @@ touch "$file_lock" "$file_cache"
 }
 
 : "${cmd_pacman_install:="sudo pacman -S"}"
-: "${cmd_pacman_remove:="sudo pacman -Rsu"}"
+: "${cmd_pacman_remove:="sudo pacman -R"}"
 : "${cmd_aur_install:="yay -S"}"
 : "${cmd_aur_list:="yay --aur -Slq"}"
-: "${i3term_options:="--instance pkg-listn --verbose"}"
+: "${i3term_options:="--instance pkg-listn"}"
 
 IFS=" " read -r -a _cmd_aur_list   <<< "$cmd_aur_list"
 IFS=" " read -r -a _i3term_options <<< "$i3term_options"
