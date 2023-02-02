@@ -1,4 +1,4 @@
-##   pkg-listn.bash
+##   pkg-listn
 #### manage your Arch linux packages with textfiles
 
 When `pkg-listn` is executed it will compare Arch
@@ -14,7 +14,7 @@ get "*marked for removal*". `pkg-listn` will then
 sort out if the packages marked for installation
 are available and from where (official Arch
 repos, or **AUR**). Then a terminal is opened
-with[i3term] listing a summary of the commands
+with [i3term] listing a summary of the commands
 that are about to get executed, the commands
 are configurable in the "*settings file*".  
 Below are the default settings: (`~/.config/pkg-listn/settings`)  
@@ -28,8 +28,8 @@ aur_list       = yay --aur -Slq
 i3term_options = --instance pkg-listn
 ```
 
-You can replace the yay commands with a different
-AUR helper, make sure that **aur_list** command
+You can replace the `yay` commands with a different
+*AUR helper*, make sure that **aur_list** command
 prints out a list of all available AUR packages, one
 pkg/line.
 
@@ -39,8 +39,8 @@ interactive pacman/yay prompt, packages are not
 installed/removed *automatically*.
 
 Included in the repository is also two **systemd**
-units, that when enabled
-(`systemctl --user enable --now pkg-listn.path`),
+units, that when enabled:  
+(`systemctl --user enable --now pkg-listn.path`),  
 will automatically execute `pkg-listn.bash` when
 the **package file** has been modified.
 
@@ -54,8 +54,8 @@ also makes it easy to recreate the same package installation
 on a new system.  
 
 The problem doing this on Arch is that something
-like this can easily even more unmanageable if
-one installs and remove packages from both with
+like this can easily get even more unmanageable if
+one installs and remove packages both with
 `pkg-listn`, `pacman`, and `yay` f.i. But with
 `pkg-listn` it shouldn't be a problem, if you
 install a package normally from the commandline
@@ -65,4 +65,13 @@ that you need to add such packages sometime later
 to your **package file**, but it is not important
 to do so, its only to have it in the list and you
 can then also use `pkg-listn` to remove that
-package.
+package (simply by removing it from **package file**).
+
+## how
+
+```
+sudo make install
+```
+
+[NixOS]: https://nixos.org/
+[i3term]: https://github.com/budlabs/i3term
