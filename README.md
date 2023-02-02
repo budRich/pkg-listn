@@ -16,9 +16,8 @@ are available and from where (official Arch
 repos, or **AUR**). Then a terminal is opened
 with[i3term] listing a summary of the commands
 that are about to get executed, the commands
-are configurable in the "*settings file*"
-(`~/.config/pkg-listn/settings`). Below are the default
-settings:  
+are configurable in the "*settings file*".  
+Below are the default settings: (`~/.config/pkg-listn/settings`)  
 
 ```text
 pacman_install = sudo pacman -S
