@@ -74,7 +74,6 @@ it is trivial to modify the script to work with
 any terminal emulator. Beside that the only
 runtime dependencies are:  
   - GNU sed
-  - GNU make
   - GNU bash
   - pacman
   - an AUR helper (optional)
