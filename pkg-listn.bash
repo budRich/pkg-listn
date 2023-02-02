@@ -26,8 +26,6 @@ ERX() { >&2 echo  "[ERROR] $*" ; exit 98 ;}
 ERR() { >&2 echo  "[WARNING] $*"  ;}
 ERM() { >&2 echo  "$*"  ;}
 
-[[ $* =~ -v(\s|$) ]] && ERM "$_about" && exit
-
 [[ -f $file_lock ]] \
   && ERX "pkg-parsing in progress, lockfile exists"
 
@@ -47,6 +45,8 @@ touch "$file_lock" "$file_cache"
   mkdir -p "$dir_config"
   cp -r "$dir_data"/* "$dir_config"
 }
+
+[[ $* =~ -v(\s|$) ]] && ERM "$_about" && exit
 
 [[ -f "$file_settings" ]] && {
   re='^\s*([^#][^=[:space:]]+)\s*=\s*(.+)$'
