@@ -4,7 +4,7 @@
 When `pkg-listn` is executed it will compare Arch
 packages listed in the *"packages file"*
 (`~/.config/pkg-listn/packages`) and the
-automatically generated *"cache file"
+automatically generated *"cache file"*
 (`~/.cache/pkg-listn/packages-cache`).
 
 Packages that are unique to the **package file**
