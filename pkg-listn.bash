@@ -73,12 +73,9 @@ touch "$file_lock" "$file_cache"
 IFS=" " read -r -a _cmd_aur_list <<< "$cmd_aur_list"
 IFS=" " read -r -a _cmd_terminal <<< "$cmd_terminal"
 
-### parse pkg list
-while read -rs line ; do
-  [[ ! $line || $line =~ ^\s*# ]] && continue
-  echo "$line"
-done < "$file_packages" \
-  | sed -r 's/\s+/\n/g' | sort -u > "$file_sorted"
+### create package list (sorted one package/line)
+sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$file_packages" \
+   | sort -u > "$file_sorted"
 
 ### compare lists
 comm -13 "$file_cache" "$file_sorted" \
