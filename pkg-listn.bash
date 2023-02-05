@@ -7,11 +7,12 @@ printf -v _about '%s - version %s\nupdated by budRich %s' \
 
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
 : "${XDG_CONFIG_HOME:=$HOME/.config}"
+: "${XDG_RUNTIME_DIR:=/tmp}"
 
 dir_script=$(dirname "$(realpath "$0")")
 dir_cache="$XDG_CACHE_HOME/$_name"
 dir_config="$XDG_CONFIG_HOME/$_name"
-dir_tmp="/tmp/$_name"
+dir_tmp="$XDG_RUNTIME_DIR/$_name"
 
 file_packages="$dir_config/packages"    # user defined pkg list
 file_settings="$dir_config/settings"    # config file
