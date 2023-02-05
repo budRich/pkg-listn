@@ -14,14 +14,17 @@ get "*marked for removal*". `pkg-listn` will then
 sort out if the packages marked for installation
 are available and from where (official Arch
 repos, or **AUR**). Then a terminal is opened
-with [i3term] listing a summary of the commands
+with a summary of the commands
 that are about to get executed, the commands
 are configurable in the "*settings file*".  
+
 Below are the default settings: (`~/.config/pkg-listn/settings`)  
 
 ```text
 pacman_install = sudo pacman -S
 pacman_remove  = sudo pacman -R
+# aur_install  = paru -S
+# aur_list     = paru --aur -Slq
 aur_install    = yay -S
 aur_list       = yay --aur -Slq
 

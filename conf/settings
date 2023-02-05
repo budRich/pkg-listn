@@ -1,5 +1,7 @@
 pacman_install = sudo pacman -S
 pacman_remove  = sudo pacman -R
+# aur_install  = paru -S
+# aur_list     = paru --aur -Slq
 aur_install    = yay -S
 aur_list       = yay --aur -Slq
 
