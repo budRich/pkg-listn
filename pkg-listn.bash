@@ -54,11 +54,11 @@ touch "$file_lock" "$file_cache"
     [[ $line =~ $re ]] || continue
     key="${BASH_REMATCH[1]}" val="${BASH_REMATCH[2]}"
     case "$key" in
-      pacman_install ) cmd_pacman_install=$val ;;
-      pacman_remove  ) cmd_pacman_remove=$val  ;;
-      aur_install    ) cmd_aur_install=$val    ;;
-      aur_list       ) cmd_aur_list=$val       ;;
-      i3term_options ) i3term_options=$val     ;;
+      pacman_install   ) cmd_pacman_install=$val ;;
+      pacman_remove    ) cmd_pacman_remove=$val  ;;
+      aur_install      ) cmd_aur_install=$val    ;;
+      aur_list         ) cmd_aur_list=$val       ;;
+      terminal_command ) cmd_terminal=$val       ;;
     esac
   done < "$file_settings"
   unset -v key val re line
@@ -68,10 +68,10 @@ touch "$file_lock" "$file_cache"
 : "${cmd_pacman_remove:="sudo pacman -R"}"
 : "${cmd_aur_install:="yay -S"}"
 : "${cmd_aur_list:="yay --aur -Slq"}"
-: "${i3term_options:="--instance pkg-listn"}"
+: "${cmd_terminal:="xterm -name pkg-listn -e "}"
 
-IFS=" " read -r -a _cmd_aur_list   <<< "$cmd_aur_list"
-IFS=" " read -r -a _i3term_options <<< "$i3term_options"
+IFS=" " read -r -a _cmd_aur_list <<< "$cmd_aur_list"
+IFS=" " read -r -a _cmd_terminal <<< "$cmd_terminal"
 
 ### parse pkg list
 while read -rs line ; do
@@ -114,18 +114,28 @@ done
 
 ### launch commands
 [[ ${commands[*]} ]] && {
-  echo "sleep .4" >> "$dir_tmp/cmd"
-  echo "cat '$dir_tmp/msg'" >> "$dir_tmp/cmd"
-  echo "The commands below will be executed:" >> "$dir_tmp/msg"
+  terminal_lock=$(mktemp "$XDG_RUNTIME_DIR/pkg-listn-lock.XXXXXX")
+
+  printf '%s\n'                             \
+    "#!/bin/sh"                             \
+    "touch '$terminal_lock'"                \
+    "trap 'rm $terminal_lock' EXIT INT HUP" \
+    "sleep .4"                              \
+    "cat '$dir_tmp/msg'" >> "$dir_tmp/cmd"
+
+  echo "The commands below will get executed:" >> "$dir_tmp/msg"
+
   for command in "${commands[@]}"; do
     echo "  $command" >> "$dir_tmp/msg"
     echo "$command"   >> "$dir_tmp/cmd"
   done
-  echo >> "$dir_tmp/msg"
 
+  echo  >> "$dir_tmp/msg"
   chmod +x "$dir_tmp/cmd"
-  cid=$(i3term "${_i3term_options[@]}" -- "$dir_tmp/cmd")
-  while i3get -n "$cid" >/dev/null; do sleep 2 ; done
+
+  "${_cmd_terminal[@]}" "$dir_tmp/cmd"
+  sleep .5 # sleep to make sure dir_tmp/terminal has been created..
+  while [[ -f "$terminal_lock" ]]; do sleep .5 ; done
 }
 
 ### update cache
