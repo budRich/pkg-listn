@@ -9,7 +9,6 @@ printf -v _about '%s - version %s\nupdated by budRich %s' \
 : "${XDG_CONFIG_HOME:=$HOME/.config}"
 : "${XDG_RUNTIME_DIR:=/tmp}"
 
-dir_script=$(dirname "$(realpath "$0")")
 dir_cache="$XDG_CACHE_HOME/$_name"
 dir_config="$XDG_CONFIG_HOME/$_name"
 dir_tmp="$XDG_RUNTIME_DIR/$_name"
@@ -39,7 +38,7 @@ touch "$file_lock" "$file_cache"
 # defaults to: /usr/share/pkg-listn
 [[ -d DATA_DIR ]] \
   && dir_data='DATA_DIR' \
-  || dir_data="$dir_script/conf"
+  || dir_data="$(dirname "$(realpath "$0")")/conf"
 
 [[ -d $dir_config ]] || {
   [[ -d $dir_data ]] || ERX "datadir not found"
