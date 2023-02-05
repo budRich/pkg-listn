@@ -1,5 +1,4 @@
-##   pkg-listn
-#### manage your Arch linux packages with textfiles
+### what?
 
 When `pkg-listn` is executed it will compare Arch
 packages listed in the *"packages file"*
@@ -34,15 +33,10 @@ aur_list       = yay --aur -Slq
 terminal_command = xterm -name pkg-listn -e 
 ```
 
-You can replace the `yay` commands with a different
-*AUR helper*, make sure that **aur_list** command
-prints out a list of all available AUR packages, one
-pkg/line.
-
-The commands will be executed accordingly in the
+The commands will get executed accordingly in the
 new terminal, and by default it will be a normal
 interactive pacman/yay prompt, packages are not
-installed/removed *automatically*.
+installed/removed **automatically**.
 
 Included in the repository is also two **systemd**
 units, that when enabled:  
@@ -73,7 +67,7 @@ to do so, its only to have it in the list and you
 can then also use `pkg-listn` to remove that
 package (simply by removing it from **package file**).
 
-## how
+### how?
 
 runtime dependencies are:
   - GNU sed
