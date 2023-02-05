@@ -75,10 +75,7 @@ package (simply by removing it from **package file**).
 
 ## how
 
-As mentioned [i3term] needs to be installed, but
-it is trivial to modify the script to work with
-any terminal emulator. Beside that the only
-runtime dependencies are:  
+runtime dependencies are:
   - GNU sed
   - GNU bash
   - pacman
@@ -90,6 +87,13 @@ When you have that run:
  # make install
  $ pkg-listn -v
 ```
+
+This will install (but not **enable** or start) the systemd
+units and add the script to `$PREFIX/bin/` as pkg-listn.
+The only available command line option is `-v` which
+will print version information to **stderr**, and
+if it is the first time `pkg-listn` is executed it
+will create the configuration files in `~/.config/pkg-listn`.
 
 [NixOS]: https://nixos.org/
 [i3term]: https://github.com/budlabs/i3term
