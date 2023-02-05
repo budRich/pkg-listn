@@ -98,9 +98,9 @@ for action in notavailable remove official aur ; do
   mapfile -t line_of_pkgs < "$dir_tmp/$action"
   case "$action" in
     
-    remove   ) commands+=("$cmd_pacman_remove ${line_of_pkgs[*]}") ;;
+    remove   ) commands+=("$cmd_pacman_remove ${line_of_pkgs[*]}")  ;;
     official ) commands+=("$cmd_pacman_install ${line_of_pkgs[*]}") ;;
-    aur      ) commands+=("$cmd_aur_install ${line_of_pkgs[*]}") ;;
+    aur      ) commands+=("$cmd_aur_install ${line_of_pkgs[*]}")    ;;
     
     notavailable ) printf '%s\n' \
       "[WARNING]: The following packages was not found in any repositories:" \
