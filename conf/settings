@@ -1,9 +1,12 @@
-pacman_install = sudo pacman -S
-pacman_remove  = sudo pacman -R
-# aur_install  = paru -S
-# aur_list     = paru --aur -Slq
-aur_install    = yay -S
-aur_list       = yay --aur -Slq
+install_foreign_command = yay -S
+install_command         = sudo pacman -S
+
+remove_foreign_command  = sudo pacman -R
+remove_command          = sudo pacman -R
+
+list_local   = pacman -Qq
+list_remote  = pacman -Slq
+list_foreign = yay --aur -Slq
 
 # terminal_command = kitty --name pkg-listn -e 
 # terminal_command = urxvtc -name pkg-listn -e 

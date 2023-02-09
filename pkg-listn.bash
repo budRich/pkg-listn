@@ -54,52 +54,71 @@ touch "$file_lock" "$file_cache"
     [[ $line =~ $re ]] || continue
     key="${BASH_REMATCH[1]}" val="${BASH_REMATCH[2]}"
     case "$key" in
-      pacman_install   ) cmd_pacman_install=$val ;;
-      pacman_remove    ) cmd_pacman_remove=$val  ;;
-      aur_install      ) cmd_aur_install=$val    ;;
-      aur_list         ) cmd_aur_list=$val       ;;
-      terminal_command ) cmd_terminal=$val       ;;
+      terminal_command        ) cmd_terminal=$val        ;;
+      install_foreign_command ) cmd_install_foreign=$val ;;
+      install_command         ) cmd_install=$val         ;;
+      remove_foreign_command  ) cmd_remove_foreign=$val  ;;
+      remove_command          ) cmd_remove=$val          ;;
+      list_local              ) cmd_list_local=$val      ;;
+      list_remote             ) cmd_list_remote=$val     ;;
+      list_foreign            ) cmd_list_foreign=$val    ;;
     esac
   done < "$file_settings"
   unset -v key val re line
 }
 
-: "${cmd_pacman_install:="sudo pacman -S"}"
-: "${cmd_pacman_remove:="sudo pacman -R"}"
-: "${cmd_aur_install:="yay -S"}"
-: "${cmd_aur_list:="yay --aur -Slq"}"
-: "${cmd_terminal:="xterm -name pkg-listn -e "}"
+: "${cmd_install:=sudo pacman -S}"
+: "${cmd_remove:=sudo pacman -R}"
+: "${cmd_remove_foreign:=sudo pacman -R}"
+: "${cmd_install_foreign:=}"
+: "${cmd_list_foreign:=echo}"
+: "${cmd_list_local:=pacman -Qq}"
+: "${cmd_list_remote:=pacman -Slq}"
+: "${cmd_terminal:=xterm -name pkg-listn -e }"
 
-IFS=" " read -r -a _cmd_aur_list <<< "$cmd_aur_list"
-IFS=" " read -r -a _cmd_terminal <<< "$cmd_terminal"
+IFS=" " read -r -a _cmd_terminal     <<< "$cmd_terminal"
+IFS=" " read -r -a _cmd_list_local   <<< "$cmd_list_local"
+IFS=" " read -r -a _cmd_list_remote  <<< "$cmd_list_remote"
+IFS=" " read -r -a _cmd_list_foreign <<< "$cmd_list_foreign"
 
 ### create package list (sorted one package/line)
 sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$file_packages" \
    | sort -u > "$file_sorted"
 
 ### compare lists
-comm -13 <(pacman -Qq | sort) "$file_sorted" > "$dir_tmp"/install
-comm -23 "$file_cache" "$file_sorted"        > "$dir_tmp"/remove
+comm -13 <("${_cmd_list_local[@]}" | sort) "$file_sorted" \
+  > "$dir_tmp"/install
+comm -23 "$file_cache" "$file_sorted" \
+  > "$dir_tmp"/remove
+
+[[ -s "$dir_tmp"/install ||  -s "$dir_tmp"/remove ]] \
+  && "${_cmd_list_remote[@]}" | sort > "$dir_tmp"/remote
 
 [[ -s "$dir_tmp"/install ]]  \
-  && comm -12 "$dir_tmp"/install <(pacman -Slq | sort) \
-   | tee "$dir_tmp"/official \
+  && comm -12 "$dir_tmp"/install "$dir_tmp"/remote \
+   | tee "$dir_tmp"/install-remote \
    | comm -13 - "$dir_tmp"/install > "$dir_tmp"/foreign
 
 [[ -s "$dir_tmp"/foreign ]] \
-  && comm -12 "$dir_tmp"/foreign <("${_cmd_aur_list[@]}" | sort) \
-   | tee "$dir_tmp"/aur     \
+  && comm -12 "$dir_tmp"/foreign <("${_cmd_list_foreign[@]}" | sort) \
+   | tee "$dir_tmp"/install-foreign     \
    | comm -13 - "$dir_tmp"/foreign > "$dir_tmp"/notavailable
 
+[[ -s "$dir_tmp"/remove ]] \
+  && comm -12 "$dir_tmp"/remove "$dir_tmp"/remote \
+   | tee "$dir_tmp"/remove-remote                 \
+   | comm -13 - "$dir_tmp"/remove > "$dir_tmp"/remove-foreign
+
 ### set actions
-for action in notavailable remove official aur ; do
+for action in notavailable remove-remote remove-foreign install-remote install-foreign ; do
   [[ -s "$dir_tmp/$action" ]] || continue
   mapfile -t line_of_pkgs < "$dir_tmp/$action"
   case "$action" in
     
-    remove   ) commands+=("$cmd_pacman_remove ${line_of_pkgs[*]}")  ;;
-    official ) commands+=("$cmd_pacman_install ${line_of_pkgs[*]}") ;;
-    aur      ) commands+=("$cmd_aur_install ${line_of_pkgs[*]}")    ;;
+    remove-remote   ) commands+=("$cmd_remove ${line_of_pkgs[*]}")  ;;
+    remove-foreign  ) commands+=("$cmd_remove_foreign ${line_of_pkgs[*]}")  ;;
+    install-remote  ) commands+=("$cmd_install ${line_of_pkgs[*]}") ;;
+    install-foreign ) commands+=("$cmd_install_foreign ${line_of_pkgs[*]}")    ;;
     
     notavailable ) printf '%s\n' \
       "[WARNING]: The following packages was not found in any repositories:" \
