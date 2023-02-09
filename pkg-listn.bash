@@ -155,4 +155,4 @@ done
 {
   cat "$dir_tmp/sorted"
   [[ -s "$dir_tmp/remove" ]] && cat "$dir_tmp/remove"
-} | sort -u | comm -12 - <(pacman -Qq | sort) > "$file_cache"
+} | sort -u | comm -12 - <("${_cmd_list_local[@]}" | sort) > "$file_cache"
