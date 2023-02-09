@@ -115,7 +115,6 @@ done
 
   printf '%s\n'                             \
     "#!/bin/sh"                             \
-    "touch '$terminal_lock'"                \
     "trap 'rm $terminal_lock' EXIT INT HUP" \
     "sleep .4"                              \
     "cat '$dir_tmp/msg'" >> "$dir_tmp/cmd"
