@@ -148,7 +148,6 @@ done
   chmod +x "$dir_tmp/cmd"
 
   "${_cmd_terminal[@]}" "$dir_tmp/cmd"
-  sleep .5 # sleep to make sure dir_tmp/terminal has been created..
   while [[ -f "$terminal_lock" ]]; do sleep .5 ; done
 }
 
