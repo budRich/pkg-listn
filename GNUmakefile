@@ -3,8 +3,6 @@
 .ONESHELL:
 SHELL := /bin/bash
 
-# .DEFAULT_GOAL       := all
-
 NAME        := pkg-listn
 PREFIX      ?= /usr
 SYSTEMD_DIR := $(DESTDIR)$(PREFIX)/lib/systemd/user
@@ -18,7 +16,7 @@ $(NAME): $(NAME).bash
 install: $(NAME)
 	install -Dm755 $(NAME) -t $(DESTDIR)$(PREFIX)/bin/
 	install -Dm644 conf/*  -t $(DESTDIR)$(PREFIX)/share/$(NAME)
-	[[ -e $(DESTDIR)$(PREFIX)/lib/systemd/ ]] \
+	[[ -e $(PREFIX)/lib/systemd/ ]] \
 		&& install -Dm644 systemd/* -t $(SYSTEMD_DIR)
 
 	rm $(NAME)
@@ -29,7 +27,7 @@ install-dev:
 uninstall-dev: uninstall
 
 uninstall:
-	rm $(DESTDIR)$(PREFIX)/bin/$(NAME)
+	[[ -f $(DESTDIR)$(PREFIX)/bin/$(NAME) ]]   && rm $(DESTDIR)$(PREFIX)/bin/$(NAME)
 	[[ -f $(SYSTEMD_DIR)/pkg-listn.service ]]  && rm $(SYSTEMD_DIR)/pkg-listn.service
 	[[ -f $(SYSTEMD_DIR)/pkg-listn.path ]]     && rm $(SYSTEMD_DIR)/pkg-listn.path
 	[[ -d $(DESTDIR)$(PREFIX)/share/$(NAME) ]] && rm -r $(DESTDIR)$(PREFIX)/share/$(NAME)
