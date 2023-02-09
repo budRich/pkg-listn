@@ -1,21 +1,23 @@
 ### what?
 
-When `pkg-listn` is executed it will compare Arch
-packages listed in the *"packages file"*
-(`~/.config/pkg-listn/packages`) and the
+When `pkg-listn` is executed it will compare the
+packages listed in *"packages file"*
+(`~/.config/pkg-listn/packages`) against packages
+that is installed locally (`pacman -Qq`) to see
+what to *"mark for installation"*. `pkg-listn`
+will then proceed to figure out from which
+repositories(*official* or *foreign*) the marked
+packages are available from. `pkg-listn` will
+also compare the *package file* against a
 automatically generated *"cache file"*
-(`~/.cache/pkg-listn/packages-cache`).
+(`~/.cache/pkg-listn/packages-cache`) to determine
+which packages to *"mark for removal"*.
 
-Packages that are unique to the **package file**
-will get "*marked for installation*", and
-packages unique to the **cache file** will
-get "*marked for removal*". `pkg-listn` will then
-sort out if the packages marked for installation
-are available and from where (official Arch
-repos, or **AUR**). Then a terminal is opened
-with a summary of the commands
-that are about to get executed, the commands
-are configurable in the "*settings file*".  
+If there is available packages marked for
+installation and/or removal, a terminal is opened
+with a summary of commands that are about to
+get executed, the commands are configurable in
+the "*settings file*".  
 
 Below are the default settings: (`~/.config/pkg-listn/settings`)  
 
@@ -34,9 +36,7 @@ terminal_command = xterm -name pkg-listn -e
 ```
 
 The commands will get executed accordingly in the
-new terminal, and by default it will be a normal
-interactive pacman/yay prompt, packages are not
-installed/removed **automatically**.
+new terminal.
 
 Included in the repository is also two **systemd**
 units, that when enabled:  
@@ -53,7 +53,7 @@ forgot what packages i had installed, and this setup
 also makes it easy to recreate the same package installation
 on a new system.  
 
-The problem doing this on Arch is that something
+The problem doing this is that something
 like this can easily get even more unmanageable if
 one installs and remove packages both with
 `pkg-listn`, `pacman`, and `yay` f.i. But with

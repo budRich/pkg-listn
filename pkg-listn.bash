@@ -78,9 +78,8 @@ sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$file_packages" \
    | sort -u > "$file_sorted"
 
 ### compare lists
-comm -13 "$file_cache" "$file_sorted" \
-   | comm -23 - <(pacman -Qq | sort)   > "$dir_tmp"/install
-comm -23 "$file_cache" "$file_sorted"  > "$dir_tmp"/remove
+comm -13 <(pacman -Qq | sort) "$file_sorted" > "$dir_tmp"/install
+comm -23 "$file_cache" "$file_sorted"        > "$dir_tmp"/remove
 
 [[ -s "$dir_tmp"/install ]]  \
   && comm -12 "$dir_tmp"/install <(pacman -Slq | sort) \
