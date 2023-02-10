@@ -72,25 +72,29 @@ package (simply by removing it from **package file**).
 
 ### how?
 
+**Arch Linux** users can install `pkg-listn` from [AUR].
+
 runtime dependencies are:
   - GNU sed
   - GNU bash
-  - pacman
+  - a package manager (pacman, apt, zypper e.t.c)
   - an AUR helper (optional)
+  - a terminal emulator (xterm, alacritty, gnome-terminal e.t.c)
 
 When you have that run:  
 
- ```
- # make install
- $ pkg-listn -v
+ ``` shell
+ git clone https://github.com/budRich/pkg-listn.git
+ cd pkg-listn
+ less GNUmakefile       # PREFIX to fit your distro
+ sudo make install
+ pkg-listn -v           # this will create the config/package file
+ cat ~/.config/settings # review the settings
+ # the default configuration is setup for pacman, aur, xterm
+ systemctl --user enable --now pkg-listn.path
+ nano ~/.config/packages # add some packages
 ```
 
-This will install (but not **enable** or start) the systemd
-units and add the script to `$PREFIX/bin/` as pkg-listn.
-The only available command line option is `-v` which
-will print version information to **stderr**, and
-if it is the first time `pkg-listn` is executed it
-will create the configuration files in `~/.config/pkg-listn`.
-
+[AUR]: https://aur.archlinux.org/packages/pkg-listn
 [NixOS]: https://nixos.org/
 [i3term]: https://github.com/budlabs/i3term
