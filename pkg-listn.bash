@@ -125,11 +125,9 @@ done
 
 ### launch commands
 [[ ${commands[*]} ]] && {
-  terminal_lock=$(mktemp "$XDG_RUNTIME_DIR/pkg-listn-lock.XXXXXX")
-
   printf '%s\n'                             \
     "#!/bin/sh"                             \
-    "trap 'rm $terminal_lock' EXIT INT HUP" \
+    "trap 'rm $dir_tmp/lock' EXIT INT HUP" \
     "sleep .4"                              \
     "cat '$dir_tmp/msg'" >> "$dir_tmp/cmd"
 
@@ -144,7 +142,8 @@ done
   chmod +x "$dir_tmp/cmd"
 
   "${_cmd_terminal[@]}" "$dir_tmp/cmd"
-  while [[ -f "$terminal_lock" ]]; do sleep .5 ; done
+  while [[ -f $dir_tmp/lock ]]; do sleep .5 ; done
+  touch "$dir_tmp/lock"
 }
 
 ### update cache
