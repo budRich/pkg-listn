@@ -31,13 +31,16 @@ touch "$dir_tmp/lock" "$dir_cache/pakages-cache"
   [[ -d DATA_DIR ]] \
     && dir_data='DATA_DIR' \
     || dir_data="$(dirname "$(realpath "$0")")/conf"
-  [[ -d $dir_data ]] || ERX "datadir not found"
+  [[ -d $dir_data ]] || ERX "'$dir_data' not found."
   mkdir -p "$dir_config"
   cp -r "$dir_data"/* "$dir_config"
 }
 
 ### commandline options
 [[ $* =~ -v(\s|$) ]] && ERM "$_about" && exit
+
+[[ -f $dir_config/packages ]] \
+  || ERX "package file ('$dir_config/packages') not found."
 
 ### parse config
 [[ -f "$dir_config/settings" ]] && {
