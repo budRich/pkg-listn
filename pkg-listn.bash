@@ -107,17 +107,18 @@ comm -23 "$dir_cache/pakages-cache" "$dir_tmp/sorted" \
 ### set actions
 for action in notavailable remove-remote remove-foreign install-remote install-foreign ; do
   [[ -s "$dir_tmp/$action" ]] || continue
-  mapfile -t line_of_pkgs < "$dir_tmp/$action"
+  mapfile -t pkg_array < "$dir_tmp/$action"
+  line_of_pkgs=${pkg_array[*]}
   case "$action" in
     
-    remove-remote   ) commands+=("$cmd_remove ${line_of_pkgs[*]}")  ;;
-    remove-foreign  ) commands+=("$cmd_remove_foreign ${line_of_pkgs[*]}")  ;;
-    install-remote  ) commands+=("$cmd_install ${line_of_pkgs[*]}") ;;
-    install-foreign ) commands+=("$cmd_install_foreign ${line_of_pkgs[*]}")    ;;
+    remove-remote   ) commands+=("$cmd_remove $line_of_pkgs")          ;;
+    remove-foreign  ) commands+=("$cmd_remove_foreign $line_of_pkgs")  ;;
+    install-remote  ) commands+=("$cmd_install $line_of_pkgs")         ;;
+    install-foreign ) commands+=("$cmd_install_foreign $line_of_pkgs") ;;
     
     notavailable ) printf '%s\n' \
       "[WARNING]: The following packages was not found in any repositories:" \
-      "  ${line_of_pkgs[*]}" "" >> "$dir_tmp/msg"
+      "  $line_of_pkgs" "" >> "$dir_tmp/msg"
     ;;
   esac
 done
