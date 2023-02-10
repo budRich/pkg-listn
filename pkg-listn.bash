@@ -134,7 +134,13 @@ done
     "#!/bin/sh"                            \
     "trap 'rm $dir_tmp/lock' EXIT INT HUP" \
     "sleep .4"                             \
-    "cat '$dir_tmp/msg'" >> "$dir_tmp/cmd"
+    "cat '$dir_tmp/msg'"                   \
+    "read -rsn1 key "                      \
+    "[[ \$key = $'\u1b' ]] && {"           \
+    "  read -rsn2 -t 0.001 key"            \
+    "  [[ \$key ]] || exit"                \
+    "}"                                    \
+    >> "$dir_tmp/cmd"
 
   echo "The commands below will get executed:" >> "$dir_tmp/msg"
 
@@ -143,7 +149,9 @@ done
     echo "$command"   >> "$dir_tmp/cmd"
   done
 
-  echo  >> "$dir_tmp/msg"
+  printf '%s\n' "" "Press any key except ESC to continue." "" \
+    >> "$dir_tmp/msg"
+
   chmod +x "$dir_tmp/cmd"
 
   "${_cmd_terminal[@]}" "$dir_tmp/cmd"
