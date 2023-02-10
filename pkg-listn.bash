@@ -13,12 +13,6 @@ dir_cache="$XDG_CACHE_HOME/$_name"
 dir_config="$XDG_CONFIG_HOME/$_name"
 dir_tmp="$XDG_RUNTIME_DIR/$_name"
 
-file_packages="$dir_config/packages"    # user defined pkg list
-file_settings="$dir_config/settings"    # config file
-file_sorted="$dir_tmp/sorted"           # sorted copy of pkg list
-file_cache="$dir_cache/packages-cache"  # sorted cache file
-file_lock="$dir_tmp/lock"
-
 set -E
 trap '(($? == 98)) && exit 98' ERR
 
@@ -26,12 +20,12 @@ ERX() { >&2 echo  "[ERROR] $*" ; exit 98 ;}
 ERR() { >&2 echo  "[WARNING] $*"  ;}
 ERM() { >&2 echo  "$*"  ;}
 
-[[ -f $file_lock ]] \
+[[ -f $$dir_tmp/lock ]] \
   && ERX "pkg-parsing in progress, lockfile exists"
 
 trap 'rm "$dir_tmp"/*' EXIT INT HUP
 mkdir -p "$dir_tmp" "$dir_cache"
-touch "$file_lock" "$file_cache"
+touch "$$dir_tmp/lock" "$$dir_cache/pakages-cache"
 
 ### install config
 [[ -d $dir_config ]] || {
@@ -49,7 +43,7 @@ touch "$file_lock" "$file_cache"
 [[ $* =~ -v(\s|$) ]] && ERM "$_about" && exit
 
 ### parse config
-[[ -f "$file_settings" ]] && {
+[[ -f "$$dir_config/settings" ]] && {
   re='^\s*([^#][^=[:space:]]+)\s*=\s*(.+)$'
   while read -rs line ; do
     [[ $line =~ $re ]] || continue
@@ -64,7 +58,7 @@ touch "$file_lock" "$file_cache"
       list_remote             ) cmd_list_remote=$val     ;;
       list_foreign            ) cmd_list_foreign=$val    ;;
     esac
-  done < "$file_settings"
+  done < "$$dir_config/settings"
   unset -v key val re line
 }
 
@@ -83,13 +77,13 @@ IFS=" " read -r -a _cmd_list_remote  <<< "$cmd_list_remote"
 IFS=" " read -r -a _cmd_list_foreign <<< "$cmd_list_foreign"
 
 ### create package list (sorted one package/line)
-sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$file_packages" \
-   | sort -u > "$file_sorted"
+sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$$dir_config/packages" \
+   | sort -u > "$$dir_tmp/sorted"
 
 ### compare lists
-comm -13 <("${_cmd_list_local[@]}" | sort) "$file_sorted" \
+comm -13 <("${_cmd_list_local[@]}" | sort) "$$dir_tmp/sorted" \
   > "$dir_tmp"/install
-comm -23 "$file_cache" "$file_sorted" \
+comm -23 "$$dir_cache/pakages-cache" "$$dir_tmp/sorted" \
   > "$dir_tmp"/remove
 
 [[ -s "$dir_tmp"/install ||  -s "$dir_tmp"/remove ]] \
@@ -156,4 +150,4 @@ done
 {
   cat "$dir_tmp/sorted"
   [[ -s "$dir_tmp/remove" ]] && cat "$dir_tmp/remove"
-} | sort -u | comm -12 - <("${_cmd_list_local[@]}" | sort) > "$file_cache"
+} | sort -u | comm -12 - <("${_cmd_list_local[@]}" | sort) > "$$dir_cache/pakages-cache"
