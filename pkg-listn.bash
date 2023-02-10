@@ -43,7 +43,7 @@ touch "$dir_tmp/lock" "$dir_cache/pakages-cache"
   || ERX "package file ('$dir_config/packages') not found."
 
 ### parse config
-[[ -f "$dir_config/settings" ]] && {
+[[ -f $dir_config/settings ]] && {
   re='^\s*([^#][^=[:space:]]+)\s*=\s*(.+)$'
   while read -rs line ; do
     [[ $line =~ $re ]] || continue
@@ -71,10 +71,10 @@ touch "$dir_tmp/lock" "$dir_cache/pakages-cache"
 : "${cmd_list_remote:=pacman -Slq}"
 : "${cmd_terminal:=xterm -name pkg-listn -e }"
 
-IFS=" " read -r -a _cmd_terminal     <<< "$cmd_terminal"
-IFS=" " read -r -a _cmd_list_local   <<< "$cmd_list_local"
-IFS=" " read -r -a _cmd_list_remote  <<< "$cmd_list_remote"
-IFS=" " read -r -a _cmd_list_foreign <<< "$cmd_list_foreign"
+IFS=" " read -ra _cmd_terminal     <<< "$cmd_terminal"
+IFS=" " read -ra _cmd_list_local   <<< "$cmd_list_local"
+IFS=" " read -ra _cmd_list_remote  <<< "$cmd_list_remote"
+IFS=" " read -ra _cmd_list_foreign <<< "$cmd_list_foreign"
 
 command -v "${_cmd_list_foreign[0]}" >/dev/null || {
   unset -v '_cmd_list_foreign[@]'
@@ -87,31 +87,31 @@ sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$dir_config/packages" \
 
 ### compare lists
 comm -13 <("${_cmd_list_local[@]}" | sort) "$dir_tmp/sorted" \
-  > "$dir_tmp"/install
-comm -23 "$dir_cache/pakages-cache" "$dir_tmp/sorted" \
-  > "$dir_tmp"/remove
+  > "$dir_tmp/install"
+comm -23 "$dir_cache/pakages-cache" "$dir_tmp/sorted"        \
+  > "$dir_tmp/remove"
 
-[[ -s "$dir_tmp"/install ||  -s "$dir_tmp"/remove ]] \
-  && "${_cmd_list_remote[@]}" | sort > "$dir_tmp"/remote
+[[ -s $dir_tmp/install ||  -s "$dir_tmp/remove" ]] \
+  && "${_cmd_list_remote[@]}" | sort > "$dir_tmp/remote"
 
-[[ -s "$dir_tmp"/install ]]  \
-  && comm -12 "$dir_tmp"/install "$dir_tmp"/remote \
-   | tee "$dir_tmp"/install-remote \
-   | comm -13 - "$dir_tmp"/install > "$dir_tmp"/foreign
+[[ -s $dir_tmp/install ]]  \
+  && comm -12 "$dir_tmp/install" "$dir_tmp/remote" \
+   | tee "$dir_tmp/install-remote"                 \
+   | comm -13 - "$dir_tmp/install" > "$dir_tmp/foreign"
 
-[[ -s "$dir_tmp"/foreign ]] \
-  && comm -12 "$dir_tmp"/foreign <("${_cmd_list_foreign[@]}" | sort) \
-   | tee "$dir_tmp"/install-foreign     \
-   | comm -13 - "$dir_tmp"/foreign > "$dir_tmp"/notavailable
+[[ -s $dir_tmp/foreign ]] \
+  && comm -12 "$dir_tmp/foreign" <("${_cmd_list_foreign[@]}" | sort) \
+   | tee "$dir_tmp/install-foreign"                                  \
+   | comm -13 - "$dir_tmp/foreign" > "$dir_tmp/notavailable"
 
-[[ -s "$dir_tmp"/remove ]] \
-  && comm -12 "$dir_tmp"/remove "$dir_tmp"/remote \
-   | tee "$dir_tmp"/remove-remote                 \
-   | comm -13 - "$dir_tmp"/remove > "$dir_tmp"/remove-foreign
+[[ -s $dir_tmp/remove ]] \
+  && comm -12 "$dir_tmp"/remove "$dir_tmp/remote" \
+   | tee "$dir_tmp/remove-remote"                 \
+   | comm -13 - "$dir_tmp/remove" > "$dir_tmp/remove-foreign"
 
 ### set actions
 for action in notavailable remove-remote remove-foreign install-remote install-foreign ; do
-  [[ -s "$dir_tmp/$action" ]] || continue
+  [[ -s $dir_tmp/$action ]] || continue
   mapfile -t pkg_array < "$dir_tmp/$action"
   line_of_pkgs=${pkg_array[*]}
   case "$action" in
@@ -130,10 +130,10 @@ done
 
 ### launch commands
 [[ ${commands[*]} ]] && {
-  printf '%s\n'                             \
-    "#!/bin/sh"                             \
+  printf '%s\n'                            \
+    "#!/bin/sh"                            \
     "trap 'rm $dir_tmp/lock' EXIT INT HUP" \
-    "sleep .4"                              \
+    "sleep .4"                             \
     "cat '$dir_tmp/msg'" >> "$dir_tmp/cmd"
 
   echo "The commands below will get executed:" >> "$dir_tmp/msg"
@@ -154,5 +154,6 @@ done
 ### update cache
 {
   cat "$dir_tmp/sorted"
-  [[ -s "$dir_tmp/remove" ]] && cat "$dir_tmp/remove"
-} | sort -u | comm -12 - <("${_cmd_list_local[@]}" | sort) > "$dir_cache/pakages-cache"
+  [[ -s $dir_tmp/remove ]] && cat "$dir_tmp/remove"
+} | sort -u | comm -12 - <("${_cmd_list_local[@]}" | sort) \
+  > "$dir_cache/pakages-cache"
