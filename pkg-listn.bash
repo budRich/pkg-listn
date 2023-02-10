@@ -22,7 +22,7 @@ ERM() { >&2 echo  "$*"  ;}
 
 trap 'rm "$dir_tmp"/*' EXIT INT HUP
 mkdir -p "$dir_tmp" "$dir_cache"
-touch "$dir_tmp/lock" "$dir_cache/pakages-cache"
+touch "$dir_tmp/lock" "$dir_cache/packages-cache"
 
 ### install config
 [[ -d $dir_config ]] || {
@@ -88,7 +88,7 @@ sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$dir_config/packages" \
 ### compare lists
 comm -13 <("${_cmd_list_local[@]}" | sort) "$dir_tmp/sorted" \
   > "$dir_tmp/install"
-comm -23 "$dir_cache/pakages-cache" "$dir_tmp/sorted"        \
+comm -23 "$dir_cache/packages-cache" "$dir_tmp/sorted"        \
   > "$dir_tmp/remove"
 
 [[ -s $dir_tmp/install ||  -s "$dir_tmp/remove" ]] \
@@ -156,4 +156,4 @@ done
   cat "$dir_tmp/sorted"
   [[ -s $dir_tmp/remove ]] && cat "$dir_tmp/remove"
 } | sort -u | comm -12 - <("${_cmd_list_local[@]}" | sort) \
-  > "$dir_cache/pakages-cache"
+  > "$dir_cache/packages-cache"
