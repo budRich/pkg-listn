@@ -90,7 +90,7 @@ When you have that run:
  sudo make install
  pkg-listn -v           # this will create the config/package file
  cat ~/.config/settings # review the settings
- # the default configuration is setup for pacman, aur, xterm
+ # the default configuration is setup to use pacman, yay, xterm
  systemctl --user enable --now pkg-listn.path
  nano ~/.config/packages # add some packages
 ```
