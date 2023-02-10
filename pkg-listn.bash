@@ -146,7 +146,10 @@ done
 
   for command in "${commands[@]}"; do
     echo "  $command" >> "$dir_tmp/msg"
-    echo "$command"   >> "$dir_tmp/cmd"
+    printf '%s\n' \
+      'echo -e "\n\n"' \
+      "echo $command"  \
+      "$command" >> "$dir_tmp/cmd"
   done
 
   printf '%s\n' "" "Press any key except ESC to continue." "" \
