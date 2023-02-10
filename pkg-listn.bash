@@ -13,10 +13,7 @@ dir_cache="$XDG_CACHE_HOME/$_name"
 dir_config="$XDG_CONFIG_HOME/$_name"
 dir_tmp="$XDG_RUNTIME_DIR/$_name"
 
-set -E
-trap '(($? == 98)) && exit 98' ERR
-
-ERX() { >&2 echo  "[ERROR] $*" ; exit 98 ;}
+ERX() { >&2 echo  "[ERROR] $*" ; exit 1 ;}
 ERR() { >&2 echo  "[WARNING] $*"  ;}
 ERM() { >&2 echo  "$*"  ;}
 
