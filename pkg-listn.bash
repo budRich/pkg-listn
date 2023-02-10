@@ -33,21 +33,22 @@ trap 'rm "$dir_tmp"/*' EXIT INT HUP
 mkdir -p "$dir_tmp" "$dir_cache"
 touch "$file_lock" "$file_cache"
 
-### parse config 
-# DATA_DIR is replaced during installation
-# defaults to: /usr/share/pkg-listn
-[[ -d DATA_DIR ]] \
-  && dir_data='DATA_DIR' \
-  || dir_data="$(dirname "$(realpath "$0")")/conf"
-
+### install config
 [[ -d $dir_config ]] || {
+  # DATA_DIR is replaced during installation
+  # defaults to: /usr/share/pkg-listn
+  [[ -d DATA_DIR ]] \
+    && dir_data='DATA_DIR' \
+    || dir_data="$(dirname "$(realpath "$0")")/conf"
   [[ -d $dir_data ]] || ERX "datadir not found"
   mkdir -p "$dir_config"
   cp -r "$dir_data"/* "$dir_config"
 }
 
+### commandline options
 [[ $* =~ -v(\s|$) ]] && ERM "$_about" && exit
 
+### parse config
 [[ -f "$file_settings" ]] && {
   re='^\s*([^#][^=[:space:]]+)\s*=\s*(.+)$'
   while read -rs line ; do
