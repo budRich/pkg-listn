@@ -131,7 +131,7 @@ done
 ### launch commands
 [[ ${commands[*]} ]] && {
   printf '%s\n'                            \
-    "#!/bin/sh"                            \
+    "#!/bin/bash"                          \
     "trap 'rm $dir_tmp/lock' EXIT INT HUP" \
     "sleep .4"                             \
     "cat '$dir_tmp/msg'"                   \
