@@ -76,6 +76,11 @@ IFS=" " read -r -a _cmd_list_local   <<< "$cmd_list_local"
 IFS=" " read -r -a _cmd_list_remote  <<< "$cmd_list_remote"
 IFS=" " read -r -a _cmd_list_foreign <<< "$cmd_list_foreign"
 
+command -v "${_cmd_list_foreign[0]}" >/dev/null || {
+  unset -v '_cmd_list_foreign[@]'
+  _cmd_list_foreign[0]="echo"
+}
+
 ### create package list (sorted one package/line)
 sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$dir_config/packages" \
    | sort -u > "$dir_tmp/sorted"
