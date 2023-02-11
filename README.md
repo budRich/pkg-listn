@@ -72,16 +72,30 @@ package (simply by removing it from **package file**).
 
 ### how?
 
-**Arch Linux** users can install `pkg-listn` from [AUR].
-
 runtime dependencies are:
   - GNU sed
   - GNU bash
   - a package manager (pacman, apt, zypper e.t.c)
   - an AUR helper (optional)
-  - a terminal emulator (xterm, alacritty, gnome-terminal e.t.c)
+  - a terminal emulator (xterm, alacritty, gnome-terminal e.t.c) 
 
-When you have that run:  
+**Arch Linux** users can install `pkg-listn` from [AUR]:  
+
+``` shell
+git clone https://aur.archlinux.org/pkg-listn.git
+cd pkg-listn
+makepkg -si
+# yay -S pkg-listn     # AUR helper does whats listed above
+pkg-listn -v           # this will create the config/package file
+cat ~/.config/settings # review the settings
+# the default configuration is setup to use pacman, yay, xterm
+systemctl --user enable --now pkg-listn.path
+nano ~/.config/packages # add some packages
+```
+
+---
+
+Or clone and install from source:  
 
  ``` shell
  git clone https://github.com/budRich/pkg-listn.git
