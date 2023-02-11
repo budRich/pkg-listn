@@ -166,7 +166,11 @@ done
 
   chmod +x "$dir_tmp/cmd"
 
-  "${_cmd_terminal[@]}" "$dir_tmp/cmd"
+  if [[ -t 0 ]] 
+    then "$dir_tmp/cmd"
+    else "${_cmd_terminal[@]}" "$dir_tmp/cmd"
+  fi
+
   while [[ -f $dir_tmp/lock ]]; do sleep .5 ; done
   touch "$dir_tmp/lock"
 }
