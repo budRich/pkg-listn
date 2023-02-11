@@ -86,11 +86,6 @@ git clone https://aur.archlinux.org/pkg-listn.git
 cd pkg-listn
 makepkg -si
 # yay -S pkg-listn     # AUR helper does whats listed above
-pkg-listn -v           # this will create the config/package file
-cat ~/.config/settings # review the settings
-# the default configuration is setup to use pacman, yay, xterm
-systemctl --user enable --now pkg-listn.path
-nano ~/.config/packages # add some packages
 ```
 
 ---
@@ -102,12 +97,19 @@ Or clone and install from source:
  cd pkg-listn
  less GNUmakefile       # PREFIX to fit your distro
  sudo make install
- pkg-listn -v           # this will create the config/package file
- cat ~/.config/settings # review the settings
- # the default configuration is setup to use pacman, yay, xterm
- systemctl --user enable --now pkg-listn.path
- nano ~/.config/packages # add some packages
 ```
+
+After installation this is how you create the default
+settings and enable the systemd units:  
+
+```shell
+pkg-listn -v           # this will create the config/package file
+cat ~/.config/pkg-listn/settings # review the settings
+# the default configuration is setup to use pacman, yay, xterm
+systemctl --user enable --now pkg-listn.path
+nano ~/.config/pkg-listn/packages # add some packages
+```
+
 
 [AUR]: https://aur.archlinux.org/packages/pkg-listn
 [NixOS]: https://nixos.org/
