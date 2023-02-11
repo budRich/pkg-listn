@@ -86,10 +86,13 @@ sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$dir_config/packages" \
    | sort -u > "$dir_tmp/sorted"
 
 ### compare lists
-comm -13 <("${_cmd_list_local[@]}" | sort) "$dir_tmp/sorted" \
-  > "$dir_tmp/install"
-comm -23 "$dir_cache/packages-cache" "$dir_tmp/sorted"        \
-  > "$dir_tmp/remove"
+"${_cmd_list_local[@]}" | sort > "$dir_tmp/installed"
+
+comm -13 "$dir_tmp/installed" "$dir_tmp/sorted" > "$dir_tmp/install"
+# package entries that are unique to the cache file
+# and is installed will get marked for removal
+comm -23 "$dir_cache/packages-cache" "$dir_tmp/sorted"  \
+  | comm -12 - "$dir_tmp/installed" > "$dir_tmp/remove"
 
 [[ -s $dir_tmp/install ||  -s "$dir_tmp/remove" ]] \
   && "${_cmd_list_remote[@]}" | sort > "$dir_tmp/remote"
