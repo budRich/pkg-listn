@@ -3,7 +3,7 @@
 _name=pkg-listn
 
 printf -v _about '%s - version %s\nupdated by budRich %s' \
-  "$_name" "0.1.2" "23/2/10"
+  "$_name" "0.1.3" "23/2/11"
 
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
 : "${XDG_CONFIG_HOME:=$HOME/.config}"
