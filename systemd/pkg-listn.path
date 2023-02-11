@@ -4,6 +4,7 @@ PartOf=graphical-session.target
 
 [Path]
 PathModified=%h/.config/pkg-listn/packages
+PathModified=%h/.config/pkg-listn/packages.d/
 
 [Install]
 WantedBy=graphical-session.target

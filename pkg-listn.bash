@@ -3,7 +3,7 @@
 _name=pkg-listn
 
 printf -v _about '%s - version %s\nupdated by budRich %s' \
-  "$_name" "0.1.3" "23/2/11"
+  "$_name" "0.1.4" "23/2/11"
 
 : "${XDG_CACHE_HOME:=$HOME/.cache}"
 : "${XDG_CONFIG_HOME:=$HOME/.config}"
@@ -16,6 +16,10 @@ dir_tmp="$XDG_RUNTIME_DIR/$_name"
 ERX() { >&2 echo  "[ERROR] $*" ; exit 1 ;}
 ERR() { >&2 echo  "[WARNING] $*"  ;}
 ERM() { >&2 echo  "$*"  ;}
+
+packages.d_is_not_empty() {
+  [[ -d $dir_config/packages.d && $(ls -A "$dir_config/packages.d") ]]
+}
 
 [[ -f $dir_tmp/lock ]] \
   && ERX "pkg-parsing in progress, lockfile exists"
@@ -39,7 +43,7 @@ touch "$dir_tmp/lock" "$dir_cache/packages-cache"
 ### commandline options
 [[ $* =~ -v(\s|$) ]] && ERM "$_about" && exit
 
-[[ -f $dir_config/packages ]] \
+[[ -f $dir_config/packages || $(packages.d_is_not_empty) ]] \
   || ERX "package file ('$dir_config/packages') not found."
 
 ### parse config
@@ -82,8 +86,10 @@ command -v "${_cmd_list_foreign[0]}" >/dev/null || {
 }
 
 ### create package list (sorted one package/line)
-sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' "$dir_config/packages" \
-   | sort -u > "$dir_tmp/sorted"
+{
+  [[ -f "$dir_config/packages" ]] && cat "$dir_config/packages"
+  packages.d_is_not_empty && cat "$dir_config/packages.d/"*
+} | sed -r 's/(^\s*|\s*$)//g;/^(#|$)/d;s/\s+/\n/g' | sort -u > "$dir_tmp/sorted"
 
 ### compare lists
 "${_cmd_list_local[@]}" | sort > "$dir_tmp/installed"

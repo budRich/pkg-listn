@@ -1,0 +1,2 @@
+# if this (packages.d) directory exists and is not empty.
+# all files there in will get concatenated to the package file.
