@@ -10,6 +10,7 @@ ORGANISATION := budlabs
 USAGE        := $(NAME) [OPTIONS]
 
 MONOLITH     := _$(NAME)
+SYSTEMD_DIR  := $(DESTDIR)$(PREFIX)/lib/systemd/user
 
 .PHONY: install-dev uninstall-dev install uninstall
 
@@ -22,7 +23,9 @@ uninstall-dev:
 
 install: $(CACHE_DIR)/$(NAME).m4
 	install -Dm755 $(CACHE_DIR)/$(NAME).m4 $(DESTDIR)$(PREFIX)/bin/$(NAME)
-	install -Dm644 data/config/*  -t $(DESTDIR)$(PREFIX)/share/$(NAME)
+	install -Dm644 data/config/packages.d/*  -t $(DESTDIR)$(PREFIX)/share/$(NAME)/packages.d
+	install -Dm644 data/config/packages      -t $(DESTDIR)$(PREFIX)/share/$(NAME)
+	install -Dm644 data/config/settings      -t $(DESTDIR)$(PREFIX)/share/$(NAME)
 	[[ -e $(PREFIX)/lib/systemd/ ]] \
 		&& install -Dm644 data/systemd/* -t $(SYSTEMD_DIR)
 
