@@ -2,6 +2,7 @@ NAME         := pkg-listn
 CREATED      := 2023-02-02
 UPDATED      := 2023-02-12
 VERSION      := 0.1.4
+LICENSE      := Unlicense
 DESCRIPTION  := Manage Linux packages with textfiles
 AUTHOR       := budRich
 CONTACT      := https://github.com/budRich/pkg-listn
