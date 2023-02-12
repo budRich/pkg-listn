@@ -91,12 +91,13 @@ makepkg -si
 ---
 
 Or clone and install from source:  
+(N.B. **gawk** and **GNUmake** is needed to build)  
 
  ``` shell
  git clone https://github.com/budRich/pkg-listn.git
  cd pkg-listn
- less GNUmakefile       # PREFIX to fit your distro
- sudo make install
+ make
+ sudo make PREFIX=/usr install # adjust PREFIX if needed
 ```
 
 After installation this is how you create the default
