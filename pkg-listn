@@ -37,6 +37,11 @@ main(){
   [[ -f $dir_config/packages || $(packages.d_is_not_empty) ]] \
     || ERX "package file ('$dir_config/packages') not found."
 
+  [[ ${_o[unmanage]} ]] && {
+    unmanage_packages "${_o[unmanage]}" "$@"
+    exit
+  }
+
   parse_config
   parse_packages
   create_lists
