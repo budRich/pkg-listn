@@ -47,6 +47,21 @@ units, that when enabled:
 will automatically execute `pkg-listn.bash` when
 the **package file** has been modified.
 
+
+#### unmanage packages
+
+You might end up in a situation where you want to
+remove entries from the package file, without uninstalling
+the packages. To do that use the command-line option
+`--unmanage PACKAGE...`, example:  
+
+```text
+$ pkg-listn --unmanage bzip2 libev pcre zlib
+```
+
+The above command would remove `bzip2 libev pcre zlib` from
+both the **package file** and the **cache file**.  
+
 ### why?
 
 When i tried using [NixOS] i found it nice to have
